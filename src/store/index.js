@@ -20,5 +20,42 @@ export default createStore({
         commit('add', payload)
       }, 1000)
     }
+  },
+  modules: {
+    aModule: {
+      namespaced: true,
+      state: {
+        count: 0
+      },
+      mutations: {
+        add(state, payload) {
+          state.count += payload
+        }
+      },
+      modules: {
+        cModule: {
+          namespaced: true,
+          state: {
+            count: 22
+          },
+          mutations: {
+            add(state, payload) {
+              state.count += payload
+            }
+          }
+        }
+      }
+    },
+    bModule: {
+      namespaced: true,
+      state: {
+        count: 10
+      },
+      mutations: {
+        add(state, payload) {
+          state.count += payload
+        }
+      }
+    }
   }
 })

@@ -2,6 +2,10 @@
   <h1 @click="add">{{ $store.state.count }}</h1>
   <div @click="asyncAdd">{{ double }}</div>
   <!-- <button @click="$store.state.count++">错误修改</button> -->
+  <hr />
+  <div @click="adda">a模块 {{ acount }}</div>
+  <hr />
+  <div @click="addb">b模块 {{ bcount }}</div>
 </template>
 
 <script setup>
@@ -21,6 +25,14 @@ const add = () => {
 }
 const asyncAdd = () => {
   store.dispatch('asyncAdd', 1)
+}
+const acount = computed(() => store.state.aModule.count)
+const bcount = computed(() => store.state.bModule.count)
+const adda = () => {
+  store.commit('aModule/add', 1)
+}
+const addb = () => {
+  store.commit('bModule/add', 2)
 }
 </script>
 
