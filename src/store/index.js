@@ -6,6 +6,7 @@ export default createStore({
   },
   getters: {
     double(state) {
+      // console.log('double', state)
       return state.count * 2
     }
   },

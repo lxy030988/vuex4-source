@@ -5,3 +5,7 @@ export function forEachValue(object, fn) {
     }
   }
 }
+
+export function isPromise(val) {
+  return val && typeof val.then === 'function'
+}
