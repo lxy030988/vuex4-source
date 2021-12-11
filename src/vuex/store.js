@@ -18,19 +18,24 @@ function installModule(store, rootState, path = [], module) {
     parentState[path[path.length - 1]] = module.state
   }
 
+  const namespaced = store._modules.getNamespaced(path)
+  console.log('namespaced', namespaced)
+
   //state
   module.forEachChild((child, key) => {
     installModule(store, rootState, path.concat(key), child)
   })
   //getters
   module.forEachGetter((getter, key) => {
-    store._getters[key] = () => {
+    store._getters[namespaced + key] = () => {
       return getter(getNestedState(store.state, path))
     }
   })
   //mutations
   module.forEachMutation((mutation, key) => {
-    const entry = store._mutations[key] || (store._mutations[key] = [])
+    const entry =
+      store._mutations[namespaced + key] ||
+      (store._mutations[namespaced + key] = [])
     //store.commit('add',payload)
     entry.push((payload) => {
       mutation.call(store, getNestedState(store.state, path), payload)
@@ -38,7 +43,9 @@ function installModule(store, rootState, path = [], module) {
   })
   //actions
   module.forEachAction((action, key) => {
-    const entry = store._actions[key] || (store._actions[key] = [])
+    const entry =
+      store._actions[namespaced + key] ||
+      (store._actions[namespaced + key] = [])
     //store.dispatch('add',payload)
     entry.push((payload) => {
       const res = action.call(store, store, payload)
