@@ -1,6 +1,19 @@
 import { createStore } from '@/vuex'
 
+function plugin1(store) {
+  const localState = localStorage.getItem('vuex-state')
+  if (localState) {
+    store.replaceState(JSON.parse(localState))
+  }
+  // console.log('plugin1', store)
+  store.subscribe((mutation, state) => {
+    //状态发生变化 会执行此回调 调用mutation的时候
+    localStorage.setItem('vuex-state', JSON.stringify(state))
+  })
+}
+
 export default createStore({
+  plugins: [plugin1],
   strict: true, //严格模式
   state: {
     count: 0

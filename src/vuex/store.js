@@ -19,7 +19,7 @@ function installModule(store, rootState, path = [], module) {
   }
 
   const namespaced = store._modules.getNamespaced(path)
-  console.log('namespaced', namespaced)
+  // console.log('namespaced', namespaced)
 
   //state
   module.forEachChild((child, key) => {
@@ -108,8 +108,20 @@ export default class Store {
 
     resetState(this, this._modules.root.state)
 
-    console.log('_modules state', this._modules)
-    console.log('Store', this)
+    // console.log('_modules state', this._modules)
+    // console.log('Store', this)
+    this._subscribes = []
+    options.plugins.forEach((plugin) => plugin(this))
+  }
+
+  subscribe(fn) {
+    this._subscribes.push(fn)
+  }
+
+  replaceState(newState) {
+    this._withCommit(() => {
+      this._state.data = newState
+    })
   }
 
   _withCommit(fn) {
@@ -130,6 +142,9 @@ export default class Store {
       this._withCommit(() => {
         entry.forEach((handler) => handler(payload))
       })
+      this._subscribes.forEach((subscribe) =>
+        subscribe({ key, payload }, this.state)
+      )
     }
   }
   dispatch = (key, payload) => {
@@ -138,7 +153,7 @@ export default class Store {
   }
 
   install(app, injectKey) {
-    console.log(app, injectKey)
+    // console.log(app, injectKey)
     app.provide(injectKey || storeKey, this)
     app.config.globalProperties.$store = this
   }
