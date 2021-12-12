@@ -1,6 +1,7 @@
 import { createStore } from '@/vuex'
 
 export default createStore({
+  strict: true, //严格模式
   state: {
     count: 0
   },

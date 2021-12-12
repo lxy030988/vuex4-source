@@ -1,7 +1,7 @@
 <template>
   <h1 @click="add">{{ $store.state.count }}</h1>
   <div @click="asyncAdd">{{ double }}</div>
-  <!-- <button @click="$store.state.count++">错误修改</button> -->
+  <button @click="$store.state.count++">错误修改</button>
   <hr />
   <div @click="adda">a模块 {{ acount }}</div>
   <hr />

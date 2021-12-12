@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import { storeKey } from './injectKey'
 import ModuleCollection from './module/module-collection'
 import { isPromise, forEachValue } from './utils'
@@ -67,6 +67,19 @@ function resetState(store, state) {
       get: () => fn(store._state)
     })
   })
+  if (store.strict) {
+    enableStrictMode(store)
+  }
+}
+
+function enableStrictMode(store) {
+  watch(
+    () => store._state.data,
+    () => {
+      console.assert(store._commiting, '不能在mutation外修改状态')
+    },
+    { deep: true, flush: 'sync' } //默认是异步监控,改成同步监控
+  )
 }
 
 export default class Store {
@@ -79,6 +92,17 @@ export default class Store {
     this._mutations = Object.create(null)
     this._actions = Object.create(null)
 
+    this.strict = options.strict || false
+    //调用的时候 知道是mutation，必须是同步代码
+    this._commiting = false
+    /**
+     * 实现
+     * 在mutation之前添加一个状态 _commiting = true
+     * 调用mutation，会更改状态
+     * 监控这个状态 为true 同步更改
+     * 否则报错
+     */
+
     //定义状态
     installModule(this, this._modules.root.state, [], this._modules.root) //根状态
 
@@ -88,6 +112,14 @@ export default class Store {
     console.log('Store', this)
   }
 
+  _withCommit(fn) {
+    //切片
+    const commiting = this._commiting
+    this._commiting = true
+    fn()
+    this._commiting = commiting
+  }
+
   get state() {
     return this._state.data
   }
@@ -95,7 +127,9 @@ export default class Store {
   commit = (key, payload) => {
     const entry = this._mutations[key]
     if (entry && entry.length) {
-      entry.forEach((handler) => handler(payload))
+      this._withCommit(() => {
+        entry.forEach((handler) => handler(payload))
+      })
     }
   }
   dispatch = (key, payload) => {
