@@ -6,6 +6,7 @@
   <div @click="adda">a模块 {{ acount }}</div>
   <hr />
   <div @click="addb">b模块 {{ bcount }}</div>
+  <div @click="addd">d模块 {{ dcount }}</div>
 </template>
 
 <script setup>
@@ -28,11 +29,16 @@ const asyncAdd = () => {
 }
 const acount = computed(() => store.state.aModule.count)
 const bcount = computed(() => store.state.bModule.count)
+const dcount = computed(() => store.state.aModule.dModule.count)
 const adda = () => {
   store.commit('aModule/add', 1)
 }
+
 const addb = () => {
   store.commit('bModule/add', 2)
+}
+const addd = () => {
+  store.commit('aModule/dModule/add', 3)
 }
 </script>
 

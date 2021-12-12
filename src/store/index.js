@@ -12,7 +12,7 @@ function plugin1(store) {
   })
 }
 
-export default createStore({
+const store = createStore({
   plugins: [plugin1],
   strict: true, //严格模式
   state: {
@@ -74,3 +74,17 @@ export default createStore({
     }
   }
 })
+
+store.registerModule(['aModule', 'dModule'], {
+  namespaced: true,
+  state: {
+    count: 32
+  },
+  mutations: {
+    add(state, payload) {
+      state.count += payload
+    }
+  }
+})
+
+export default store

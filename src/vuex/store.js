@@ -15,7 +15,10 @@ function installModule(store, rootState, path = [], module) {
     const parentState = path
       .slice(0, -1)
       .reduce((state, key) => state[key], rootState)
-    parentState[path[path.length - 1]] = module.state
+
+    store._withCommit(() => {
+      parentState[path[path.length - 1]] = module.state
+    })
   }
 
   const namespaced = store._modules.getNamespaced(path)
@@ -112,6 +115,18 @@ export default class Store {
     // console.log('Store', this)
     this._subscribes = []
     options.plugins.forEach((plugin) => plugin(this))
+  }
+
+  registerModule(path, rawModule) {
+    if (typeof path === 'string') {
+      path = [path]
+    }
+    //在原有模块基础上新增一个模块
+    const module = this._modules.register(rawModule, path)
+    //把模块安装上
+    installModule(this, this.state, path, module)
+    //重置容器
+    resetState(this, this.state)
   }
 
   subscribe(fn) {
