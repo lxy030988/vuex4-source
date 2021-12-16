@@ -22,13 +22,18 @@
           position: window.history.length - 1
         }
       }
-      function createCurrnetLocation() {
+      function createCurrnetLocation(base) {
         const { pathname, search, hash } = window.location
+
+        const index = base.indexOf('#')
+        if (index > -1) {
+          return base.slice(1) || '/'
+        }
         return pathname + search + hash
       }
-      function useHistoryStateNavigation() {
+      function useHistoryStateNavigation(base) {
         const currentLocation = {
-          value: createCurrnetLocation()
+          value: createCurrnetLocation(base)
         }
         const historyState = {
           value: window.history.state
@@ -40,7 +45,9 @@
         }
 
         function changeLocation(to, state, replace) {
-          window.history[replace ? 'replaceState' : 'pushState'](state, null, to)
+          const index = base.indexOf('#')
+          const url = index > -1 ? base + to : to
+          window.history[replace ? 'replaceState' : 'pushState'](state, null, url)
           historyState.value = state
         }
 
@@ -82,11 +89,11 @@
         }
       }
 
-      function useHistoryListeners(historyState, location) {
+      function useHistoryListeners(base, historyState, location) {
         let listens = []
         window.addEventListener('popstate', ({ state }) => {
           console.log('popstate', state, historyState, location)
-          const to = createCurrnetLocation()
+          const to = createCurrnetLocation(base)
           const from = location.value
           const fromState = historyState.value
 
@@ -105,10 +112,10 @@
         return { listen }
       }
 
-      function createWebHistory() {
-        const historyNavigation = useHistoryStateNavigation()
+      function createWebHistory(base = '') {
+        const historyNavigation = useHistoryStateNavigation(base)
 
-        const historyListeners = useHistoryListeners(historyNavigation.state, historyNavigation.location)
+        const historyListeners = useHistoryListeners(base, historyNavigation.state, historyNavigation.location)
 
         const router = Object.assign({}, historyNavigation, historyListeners)
         Object.defineProperty(router, 'location', {
@@ -116,7 +123,10 @@
         })
         return router
       }
-      const myhistory = createWebHistory()
+      function createWebHash() {
+        return createWebHistory('#')
+      }
+      const myhistory = createWebHash()
       console.log(myhistory)
       myhistory.listen((to, from, { isBack }) => {
         console.log('listen', to, from, isBack)
