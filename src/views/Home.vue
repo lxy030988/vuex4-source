@@ -7,3 +7,10 @@
 
   <router-view></router-view>
 </template>
+<script>
+export default {
+  mounted() {
+    console.log('home mounted')
+  }
+}
+</script>
