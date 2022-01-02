@@ -1,69 +1,9 @@
 export { createWebHistory } from './history/h5'
 export { createWebHash } from './history/hash'
 import { RouterLink } from './router-link'
-
+import { RouterView } from './router-view'
+import { createRouterMatcher } from './matcher'
 import { computed, reactive, ref, shallowRef, unref } from 'vue'
-
-function normalizeRecord(route) {
-  return {
-    path: route.path,
-    name: route.name,
-    meta: route.meta || {},
-    beforeEnter: route.beforeEnter,
-    components: { default: route.component },
-    children: route.children
-  }
-}
-
-function createRouteMatcher(record, parent) {
-  const matcher = {
-    path: record.path,
-    record,
-    parent,
-    children: []
-  }
-  if (parent) {
-    parent.children.push(matcher)
-  }
-  return matcher
-}
-
-function createRouterMatcher(routes) {
-  const matchers = []
-
-  function addRoute(route, parent = null) {
-    const record = normalizeRecord(route)
-    // console.log('record', record)
-    if (parent) {
-      record.path = parent.path + record.path
-    }
-
-    const matcher = createRouteMatcher(record, parent)
-    if (record.children && record.children.length) {
-      record.children.forEach((child) => addRoute(child, matcher))
-    }
-    matchers.push(matcher)
-  }
-  routes.forEach((route) => addRoute(route))
-
-  function resolve(location) {
-    const matched = []
-
-    let matcher = matchers.find((m) => {
-      return m.path === location.path
-    })
-    while (matcher) {
-      matched.push(matcher.record) //将用户的原始数据 放到mathed中
-      matcher = matcher.parent
-    }
-
-    return {
-      path: location.path,
-      matched
-    }
-  }
-  return { matchers, addRoute, resolve }
-}
 
 //初始化路由系统中的默认参数
 const START_LOCATION_NORMALIZEN = {
@@ -146,18 +86,12 @@ export function createRouter({ history, routes }) {
       }
 
       app.provide('router', this)
-      app.provide('route', reactive(currentRouter))
+      app.provide('route', reactive(reactiveRouter))
 
       const obj = reactive(reactiveRouter)
-      // console.log(currentRouter.value, reactiveRouter, obj)
 
       app.component('router-link', RouterLink)
-      app.component('router-view', {
-        setup:
-          (props, { slots }) =>
-          () =>
-            <div>router-view</div>
-      })
+      app.component('router-view', RouterView)
 
       if (currentRouter.value === START_LOCATION_NORMALIZEN) {
         //默认就是初始化
