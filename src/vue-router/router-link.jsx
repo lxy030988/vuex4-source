@@ -11,7 +11,7 @@ export const RouterLink = {
   setup: (props, { slots }) => {
     const router = inject('router')
     const navigate = () => {
-      console.log('navigate', props.to)
+      // console.log('navigate', props.to)
       router.push(props.to)
     }
     return () =>
